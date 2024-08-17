@@ -32,6 +32,11 @@ contract Marketplace is ERC1155Supply, Ownable, Pausable {
     // Mapping from asset token ID to its price in MTOKEN
     mapping(uint256 => uint256) public assetPrices;
 
+    // if tokenURI is not an empty string => an NFT was created
+    // if price is not 0 => an NFT was listed
+    // if price is 0 && tokenURI is an empty string => NFT was transferred (either bought, or the listing was canceled)
+    event AssetTransfer(uint256 tokenId, address from, address to, uint256 price);
+
 
     constructor() ERC1155("<https://api.example.com/metadata/{id}.json>") {
         // Mint initial MTOKENs for the contract owner
@@ -59,6 +64,18 @@ contract Marketplace is ERC1155Supply, Ownable, Pausable {
         mintMTokens(msg.sender, amount);
     }
 
+    // TODO: list asset tokens of user
+
+
+    // TODO: list all assets
+    
+
+    // TODO: get MTOKEN balance of account (user)
+
+
+    // TODO: cancel listing of an asset
+
+
     // Function to create a new asset (ATOKEN)
     function createAsset(uint256 priceInMTokens) public whenNotPaused {
         uint256 newAssetId = _atokenIdCounter.current();
@@ -69,6 +86,8 @@ contract Marketplace is ERC1155Supply, Ownable, Pausable {
 
         // Set the price for the asset
         assetPrices[newAssetId] = priceInMTokens;
+
+        emit AssetTransfer(newAssetId, address(0), msg.sender, 0);
     }
 
     // Function to buy an asset
@@ -87,6 +106,8 @@ contract Marketplace is ERC1155Supply, Ownable, Pausable {
 
         // Clear the price of the asset
         assetPrices[assetId] = 0;
+
+        emit AssetTransfer(assetId, address(0), msg.sender, 0);
     }
 
     // Function to get the owner of an asset token
