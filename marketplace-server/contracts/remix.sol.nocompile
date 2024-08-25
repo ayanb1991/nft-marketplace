@@ -15,13 +15,13 @@ contract Marketplace is ERC1155, Ownable, Pausable {
     Counters.Counter private _atokenIdCounter;
 
     // price of 1 MTOKEN / ether
-    uint256 public constant PRICE_PER_TOKEN = 0.1 ether;
+    uint256 private constant PRICE_PER_TOKEN = 0.1 ether;
 
     // Mapping from user addresses and their acccount balance in MTOKEN
     mapping(address => uint256) public balances;
 
     // token types
-    uint256 public constant MTOKEN_ID = 1; // (FT)
+    uint256 private constant MTOKEN_ID = 1; // (FT)
 
     // if tokenURI is not an empty string => an NFT was created
     // if price is not 0 => an NFT was listed
@@ -45,10 +45,9 @@ contract Marketplace is ERC1155, Ownable, Pausable {
     }
 
     // Mint function for MTOKEN
-    function mintMTokens(address account, uint256 amount) public onlyOwner {
+    function mintMTokens(address account, uint256 amount) public {
         _mint(account, MTOKEN_ID, amount, "");
     }
-
 
     // Function to buy extra MTOKENs in exchange for Ether
     function buyTokens() public payable {
@@ -67,21 +66,38 @@ contract Marketplace is ERC1155, Ownable, Pausable {
         }
     }
 
+    // TODO: can users convert back their MTOKENS to ethers?
+
+    // TODO: how will joining bonus work
+    // in this project user is an external account, possibly a wallet, e.g metamask. so when user registers, 
+    // we call the mintMTokens functions from backend
+
+
     // TODO: list assets of an user
+    // use list all asset at backend and use filters
 
 
+    function getAsset(uint256 assetId) public view returns (AssetListing memory) {
+        return _listings[assetId];
+    }
 
-    // TODO: list all assets
-    
+    function getLatestAssetId() public view returns (uint256) {
+        return _atokenIdCounter.current();
+    }
 
     // TODO: get MTOKEN balance of account (user)
+    function getMTokenBalance(address account) public view returns (uint256) {
+        return balanceOf(account, MTOKEN_ID);
+    }
 
 
-    // TODO: cancel listing of an asset
+    // de-list an already created asset
+    function clearListing(uint256 assetId) private {
+        _listings[assetId].price = 0;
+    }
 
 
     // Function to create a new asset (ATOKEN)
-    // whoom we refer as msg.sender, the contract owner or the registered user 
     function createAsset(uint256 priceInMTokens, string memory ipfsTokenURI) public whenNotPaused {
         _atokenIdCounter.increment();
         uint256 newAssetId = _atokenIdCounter.current();
@@ -99,13 +115,25 @@ contract Marketplace is ERC1155, Ownable, Pausable {
         _mint(msg.sender, newAssetId, 1, "");
     }
 
+    function removeAsset(uint256 assetId) public whenNotPaused {
+        AssetListing memory listing = _listings[assetId];
+        require(listing.price > 0, "Asset is not available or not listed for sell");
+
+        address seller = ownerOf(assetId);
+        require(seller != msg.sender, "You are not the owner of this asset");
+
+        clearListing(assetId);
+    }
+
     // Function to buy an asset
-    function buyAsset(uint256 assetId) public whenNotPaused {
+    function transferAssetOwnership(uint256 assetId) public whenNotPaused {
         AssetListing memory listing = _listings[assetId];
         require(balanceOf(msg.sender, MTOKEN_ID) >= listing.price, "Insufficient MTOKEN balance");
 
         address seller = ownerOf(assetId);
         require(seller != msg.sender, "Cannot buy your own asset");
+
+        require(listing.price != 0, "Asset not listed for sell");
 
         // deduct MTOKENs from buyer and send to owner (FT)
         // TODO: need approval from spender or "ERC1155: caller is not token owner or approved" issue will occur
