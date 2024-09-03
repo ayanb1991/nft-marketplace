@@ -57,5 +57,7 @@ export const useMetaMask = () => {
     }
   };
 
+  
+
   return { account, provider, connectWallet };
 };
