@@ -7,20 +7,6 @@ class AuthController {
     this.auth = admin.auth();
   }
 
-  async signup(signupData) {
-    try {
-      const { email, password, displayName } = signupData;
-      return await this.auth.createUser({
-        email,
-        password,
-        displayName,
-        disabled: false
-      });
-    } catch (error) {
-      throw new Error(`Signup error: ${error.message}`);
-    }
-  }
-
   async verifyIdToken(idToken) {
     try {
       const decodedToken = await this.auth.verifyIdToken(idToken);

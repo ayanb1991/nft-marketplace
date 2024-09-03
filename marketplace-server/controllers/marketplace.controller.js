@@ -4,7 +4,7 @@ const helpers = require("../utilities/helper");
 const {getContractInstance} = require("../utilities/helper");
 
 const contract = getContractInstance();
-const ipfsClient = new ipfs().createClient();
+const ipfsProvider = new ipfs();
 
 const confirmCallerAddress = (req, res) => {
   if (!req.body.address) {
@@ -18,13 +18,15 @@ const createAsset = async (req, res, next) => {
   try {
     const { name, description, price, imgUrl, address } = req.body;
     const newAsset = { name, description, price, imgUrl };
-    const _res = await ipfsClient.add(
+    await ipfsProvider.createClient();
+    const _res = await ipfsProvider.add(
       JSON.stringify({
         name,
         description,
         imgUrl,
       })
     );
+    logger.info(`asset added to ipfs with cid: ${_res.path}`);
     // TODO: how to call write operations of the contract for an EOA
     const assetId = await contract.methods.createAsset(price, _res.path).send({from: address});
     // assign assetId to new asset
@@ -89,20 +91,6 @@ const transferAssetOwnership = async (req, res) => {
   }
 }
 
-const buyMTokens = async (req, res) => {
-  try {
-    const { address } = req.body;
-
-    // TODO: how an user can buy mtoken using ethers from metasmask?
-    const mtokenTxn = await contract.methods.buyTokens().send({from: address, value: 1000000000000000000});
-
-    res.status(200).json({ mtokenTxn });
-  } catch (error) {
-    logger.error(error.message);
-    res.status(500).send(error);
-  }
-}
-
 const listAllAssets = () => {
   const promise = new Promise(async (resolve, reject) => {
     try {
@@ -136,7 +124,7 @@ const getOwnedItems = async (req, res, next) => {
 
     const allAssets = await listAllAssets();
     const ownedItems =
-      allAssets.filter((el) => el.currentOwner === account) || [];
+      allAssets.filter((el) => el.currentOwner === account.address) || [];
 
     res.status(200).send(ownedItems);
   } catch (error) {

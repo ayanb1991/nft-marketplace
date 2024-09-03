@@ -1,6 +1,6 @@
 const AuthController = require('./auth.controller');
 const logger = require('../utilities/logger');
-const {getContractInstance, getLocalDeployer} = require("../utilities/helper");
+const {getContractInstance, getDeployer} = require("../utilities/helper");
 
 const contract = getContractInstance();
 
@@ -15,7 +15,7 @@ const signup = async (req, res) => {
     logger.info(`signing up user with data ${JSON.stringify(_user)}`);
     const userRecord = await AuthController.signup(_user);
     // Feature: user will get joining bonus upon signing up
-    const deployer = await getLocalDeployer();
+    const deployer = await getDeployer();
     await contract.methods.generateMTOKENS(address, 1000).send({from: deployer});
 
     return res.status(201).json({
@@ -52,8 +52,23 @@ const getBalance = async (req, res) => {
   }
 }
 
+const buyMTokens = async (req, res) => {
+  try {
+    const { address } = req.body;
+
+    // TODO: how an user can buy mtoken using ethers from metasmask?
+    const mtokenTxn = await contract.methods.buyTokens().send({from: address, value: 1000000000000000000});
+
+    res.status(200).json({ mtokenTxn });
+  } catch (error) {
+    logger.error(error.message);
+    res.status(500).send(error);
+  }
+}
+
 module.exports = {
   signup,
   logout,
-  getBalance
+  getBalance,
+  buyMTokens
 };

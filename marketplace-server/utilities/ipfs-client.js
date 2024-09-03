@@ -7,7 +7,7 @@ class IPFSClient {
     }
 
     static getClient() {
-        return this.client;
+        return ;
     }
 
     async createClient() {
@@ -16,6 +16,8 @@ class IPFSClient {
 
         // create a Helia node
         this.client = await createHelia();
+        // set max concurrent connections to 10
+        this.client.libp2p.con
         // create a filesystem on top of Helia, in this case it's UnixFS
         this.fs = unixfs(this.client);
         // print out our node's PeerId
@@ -31,7 +33,9 @@ class IPFSClient {
             // add the bytes to your node and receive a unique content identifier
             const cid = await this.fs.addBytes(encoder.encode(JSON.stringify(jsonObject)), this.client.blockstore);
 
-            return cid;
+            return {
+                path: cid.toString(),
+            }
         } catch (error) {
             throw new Error(error);
         }

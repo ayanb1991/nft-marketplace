@@ -16,8 +16,9 @@ const getContractInstance = () => {
   return new provider.eth.Contract(abis.nftMarketPlaceAbi, process.env.CONTRACT_ADDRESS);
 }
 
-const getLocalDeployer = async () => {
-  // for now statically inject first account from local hardhat chain as platform user
+const getDeployer = async () => {
+  // for now statically inject first account from local hardhat chain as deployer
+  // TODO: fix this after initial review, for production, this should be the owner of the contract
   const [deployer] = await provider.eth.getAccounts();
   return deployer;
 }
@@ -25,5 +26,5 @@ const getLocalDeployer = async () => {
 module.exports =  {
   parseAsset,
   getContractInstance,
-  getLocalDeployer,
+  getDeployer,
 };
