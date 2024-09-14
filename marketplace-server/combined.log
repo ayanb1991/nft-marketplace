@@ -80,3 +80,29 @@
 {"level":"error","message":"request to http://127.0.0.1:8545/ failed, reason: connect ECONNREFUSED 127.0.0.1:8545","timestamp":"2024-09-03T06:42:42.590Z"}
 {"level":"info","message":"asset added to ipfs with cid: bafkreiffo34znm3sfmaousfxiyl2pfxpu2tw56frj76uggjeep3qkg6v4i","timestamp":"2024-09-03T06:43:59.920Z"}
 {"level":"error","message":"Returned error: Unknown account 0xF636ab4c3C893d973edD4bBC14B2052edD14426D","timestamp":"2024-09-03T06:43:59.990Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-12T14:40:55.465Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-12T14:40:59.915Z"}
+{"level":"info","message":"asset added to ipfs with cid: bafkreiffo34znm3sfmaousfxiyl2pfxpu2tw56frj76uggjeep3qkg6v4i","timestamp":"2024-09-12T14:41:09.597Z"}
+{"level":"error","message":"Returned error: Unknown account 0xF636ab4c3C893d973edD4bBC14B2052edD14426D","timestamp":"2024-09-12T14:41:09.628Z"}
+{"level":"info","message":"asset added to ipfs with cid: bafkreiffo34znm3sfmaousfxiyl2pfxpu2tw56frj76uggjeep3qkg6v4i","timestamp":"2024-09-12T14:42:01.409Z"}
+{"level":"error","message":"Do not know how to serialize a BigInt","timestamp":"2024-09-12T14:42:01.443Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T04:51:57.492Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T04:55:04.065Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T04:56:53.932Z"}
+{"level":"info","message":"asset added to ipfs with cid: bafkreiblhohjav2wtvl2xpc4png5oatvnac3hvsnieymm7gdk3i2ozby3u","timestamp":"2024-09-14T04:57:03.498Z"}
+{"level":"error","message":"Returned error: Unknown account 0xF636ab4c3C893d973edD4bBC14B2052edD14426D","timestamp":"2024-09-14T04:57:03.530Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T05:33:51.607Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T05:36:12.690Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T05:37:11.517Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T05:39:10.174Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T05:43:36.639Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:00:16.578Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:08:04.081Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:09:54.518Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:11:59.465Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:26:16.623Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:41:12.786Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:49:44.502Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:55:53.727Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:57:33.163Z"}
+{"level":"info","message":"Marketplace API listening at <http://localhost>:3004","timestamp":"2024-09-14T06:57:57.788Z"}

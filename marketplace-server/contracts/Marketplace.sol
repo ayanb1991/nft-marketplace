@@ -68,18 +68,9 @@ contract Marketplace is ERC1155, Ownable, Pausable {
     }
 
     function generateMTOKENS(address account, uint256 amount) public onlyOwner whenNotPaused {
+        console.log("Generating MTOKEN for address: %s", account);
         _mint(account, MTOKEN_ID, amount, "");
     }
-
-    // TODO: can users convert back their MTOKENS to ethers?
-
-    // TODO: how will joining bonus work
-    // in this project user is an external account, possibly a wallet, e.g metamask. so when user registers, 
-    // we call the mintMTokens functions from backend
-
-
-    // TODO: list assets of an user
-    // use list all asset at backend and use filters
 
 
     function getAsset(uint256 assetId) public view returns (AssetListing memory) {
