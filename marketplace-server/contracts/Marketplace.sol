@@ -118,7 +118,8 @@ contract Marketplace is ERC1155, Ownable, Pausable {
         require(listing.price > 0, "Asset is not available or not listed for sell");
 
         address seller = ownerOf(assetId);
-        require(seller != msg.sender, "You are not the owner of this asset");
+        console.log("removeAsset:Seller: %s Sender: %s", seller, msg.sender);
+        require(seller == msg.sender, "You are not the owner of this asset");
 
         clearListing(assetId);
     }

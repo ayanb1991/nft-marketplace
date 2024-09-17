@@ -1,13 +1,14 @@
 const provider = require("../utilities/provider");
 const abis = require("../utilities/abi");
+const web3 = require("web3");
 
 const parseAsset = (asset) => {
-  const [tokenId, currentOwner, price, tokenURI] = asset;
+  const {tokenId, currentOwner, price, tokenURI} = asset;
   return {
-    tokenId: tokenId.toNumber(),
+    tokenId: web3.utils.toNumber(tokenId),
     tokenURI,
     currentOwner,
-    price: price.toNumber(),
+    price: web3.utils.toNumber(price),
   };
 };
 

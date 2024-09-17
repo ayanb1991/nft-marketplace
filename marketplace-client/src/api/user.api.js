@@ -8,8 +8,6 @@ const userApi = {
 
   getBalance: () => axiosInstance.get(`/user/balance`),
 
-  // Blockchain write operation, TX will be generated and sent to API
-  recharge: (amount) => axiosInstance.post(`/user/recharge`, { amount }),
 };
 
 export default userApi;

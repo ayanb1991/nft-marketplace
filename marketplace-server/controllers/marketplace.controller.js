@@ -1,14 +1,9 @@
 const logger = require("../utilities/logger");
 const helpers = require("../utilities/helper");
 const {getContractInstance} = require("../utilities/helper");
+const web3 = require("web3");
 
 const contract = getContractInstance();
-
-const confirmCallerAddress = (req, res) => {
-  if (!req.body.address) {
-    return res.status(400).send({ error: 'Address is required' });
-  }
-}
 
 const getAssetById = async (req, res) => {
   try {
@@ -32,17 +27,17 @@ const listAllAssets = () => {
     try {
       const lastAssetId =  await contract.methods.getLatestAssetId().call();
       let allAssets = [];
-      for (let i = 1; i <= Number(lastAssetId.toString()); i++) {
-        const chainData = helpers.parseAsset(await contract.methods.getAssetById().call());
-        const ipfsURI = await contract.methods.getAssetByURI().call();
-        const ipfsRes = await axios.get(
-          `${process.env.IPFS_GATEWAY}/${ipfsURI}`
-        );
-        const ipfsData = ipfsRes.data;
+      for (let assetId = 10001; assetId <= Number(lastAssetId.toString()); assetId++) {
+        const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
+        const ipfsURI = chainData.tokenURI;
+        // const ipfsRes = await axios.get(
+        //   `${process.env.IPFS_GATEWAY}/${ipfsURI}`
+        // );
+        // const ipfsData = ipfsRes.data;
         // combine data obtained from chain and ipfs
         const _asset = {
           ...chainData,
-          ...ipfsData,
+          // ...ipfsData,
         };
         allAssets.push(_asset);
       }
@@ -56,12 +51,11 @@ const listAllAssets = () => {
 
 const getOwnedItems = async (req, res, next) => {
   try {
-    const { account } = req.body;
+    const { address } = req.params;
 
     const allAssets = await listAllAssets();
-    const ownedItems =
-      allAssets.filter((el) => el.currentOwner === account.address) || [];
-
+    const ownedItems = allAssets.filter((el) => web3.utils.toChecksumAddress(el.currentOwner) === web3.utils.toChecksumAddress(address)) || [];
+    
     res.status(200).send(ownedItems);
   } catch (error) {
     logger.error(error.message);
@@ -82,11 +76,8 @@ const getListedAssets = async (req, res, next) => {
 };
 
 module.exports = {
-  createAsset,
-  removeAsset,
   getAssetById,
   getOwnedItems,
   getListedAssets,
   listAllAssets,
-  transferAssetOwnership,
 }
