@@ -42,7 +42,7 @@ export const useMetaMask = () => {
     try {
       const accounts = await provider.send("eth_requestAccounts", []);
       const metaMaskAccount = accounts[0];
-      console.log("metaMaskAccount", metaMaskAccount);
+      console.log("metamask account:", metaMaskAccount);
       setAccount(metaMaskAccount);
     } catch (error) {
       console.error("Failed to connect wallet:", error);
@@ -51,7 +51,10 @@ export const useMetaMask = () => {
 
   const handleAccountsChanged = (accounts) => {
     if (accounts.length > 0) {
-      setAccount(accounts[0]);
+      const metaMaskAccount = accounts[0];
+      setAccount(metaMaskAccount);
+      console.log("Account changed:");
+      console.log("metamask account:", metaMaskAccount);
     } else {
       setAccount(null);
     }

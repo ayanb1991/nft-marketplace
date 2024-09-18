@@ -1,14 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Container, Typography, TextField, Button, Box } from "@mui/material";
+import { useMetaMask } from "../../hooks/useMetamask";
+import { nftMarketPlaceAbi } from "../../utilities/abi";
+import { connectToContract, getLocalSigner } from "../../utilities";
+
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const Signup = () => {
+  const { account, connectWallet } = useMetaMask();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = () => {
+  useEffect(() => {
+    connectWallet();
+  }, []);
+
+  const generateMtoken = async () => {
+    try {
+      // here runner or signer is contract deployer from hardhat predefined accounts
+      const localSigner = await getLocalSigner();
+      const contract = await connectToContract(
+        contractAddress,
+        nftMarketPlaceAbi,
+        localSigner
+      );
+      const txHash = await contract.generateMTOKENS(account, 100);
+      console.log("txHash", txHash);
+    } catch (e) {
+      console.log("error", e);
+    }
+  };
+
+  const handleSignup = async () => {
     // Handle signup logic here
+    await generateMtoken();
   };
 
   return (
@@ -58,10 +85,7 @@ const Signup = () => {
         </Button>
         <Box>
           <Typography variant="body2">
-            Already have an account?{" "}
-            <Link to="/login">
-              Login
-            </Link>
+            Already have an account? <Link to="/login">Login</Link>
           </Typography>
         </Box>
       </Box>
