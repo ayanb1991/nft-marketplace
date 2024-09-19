@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import MyAssets from "../my-assets/my-assets";
 import { Button, Typography } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
@@ -64,37 +63,22 @@ const MyProfile = () => {
 
   return (
     <div>
-      <h1>Profile</h1>
-      <Typography variant="h2" component="h1" gutterBottom>
-        User Balance: {userBalance}
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Your Profile
       </Typography>
-      <MyAssets assets={[]} />
+      <Typography variant="h2" component="h1">
+        MToken Balance: {userBalance}
+      </Typography>
+      <Typography variant="subtitle1" component="h1" gutterBottom>
+        Connected Account: {account}
+      </Typography>
       <Button
-        type="button"
-        fullWidth
         variant="contained"
-        sx={{ mt: 3, mb: 2 }}
+        color="primary"
+        sx={{ mt: 2 }}
         onClick={rechargeMtoken}
       >
-        Recharge
-      </Button>
-      <Button
-        type="button"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        onClick={getBalance}
-      >
-        Get Balance
-      </Button>
-      <Button
-        type="button"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        onClick={getOwnedAssets}
-      >
-        My Assets
+        Recharge MToken
       </Button>
     </div>
   );

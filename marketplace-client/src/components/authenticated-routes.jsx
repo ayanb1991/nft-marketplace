@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import { isAuthenticated } from "../utilities/firebase";
-import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
+import { Navigate } from "react-router-dom";
 
 const AuthenticatedRoutes = (props) => {
   return (
     <Fragment>
-      {isAuthenticated() ? props.children : <Redirect to="/login" />}
+      {isAuthenticated() ? props.children : <Navigate to="/login" />}
     </Fragment>
   );
 }
