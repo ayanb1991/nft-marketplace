@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Typography,
@@ -6,6 +7,8 @@ import {
   TextField,
   MenuItem,
   Box,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
@@ -17,14 +20,67 @@ const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const CreateAsset = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
-  const categories = ["Car", "Mobile", "Arts"];
+  const navigate = useNavigate();
+
+  const categories = ["Car", "Mobile", "Arts", "Stationary", "Electronics"];
+  const [newAsset, set_newAsset] = useState({
+    name: "",
+    category: "",
+    description: "",
+    price: 0,
+    imgUrl: "https://picsum.photos/seed/picsum/200/300",
+  });
+  const [alertConfig, set_alertConfig] = useState({
+    message: "",
+    severity: "success",
+  });
 
   useEffect(() => {
-    connectWallet();
-  }, []);
+    if (metamaskProvider) {
+      connectWallet();
+    }
+  }, [metamaskProvider, connectWallet]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    set_newAsset((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resetAlert = () => {
+    set_alertConfig({
+      message: "",
+      severity: "success",
+    });
+  }
+
+  const handleAlertClose = () => {
+    resetAlert();
+  };
+
+  const resetForm = () => {
+    set_newAsset({
+      name: "",
+      category: "",
+      description: "",
+      price: 0,
+      imgUrl: null,
+    });
+  }
+
+  const handleCreateAsset = async (e) => {
+    e.preventDefault();
+    const { name, category, description, price, imgUrl } = newAsset;
+    if (!name || !category || !description || !price || !imgUrl) {
+      set_alertConfig({
+        message: "All fields are required",
+        severity: "error",
+      });
+      return;
+    }
+    await createAsset(e);
+  };
 
   const createAsset = async (e) => {
-    e.preventDefault();
     try {
       const metamaskSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -34,26 +90,31 @@ const CreateAsset = () => {
       );
       // save data to ipfs and obtain url
       const price = 5;
-      const newAsset = {
-        name: "My Old Laptop",
-        description: "Item description",
-        imgUrl: "https://picsum.photos/200/300",
-      };
       const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
       console.log("ipfsURI", ipfsURI);
 
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");
 
-      const txHash = await contract.createAsset(price, ipfsURI);
-      console.log("txHash", txHash);
+      const tx = await contract.createAsset(price, ipfsURI);
+      await tx.wait();
+
+      // refresh the form
+      resetForm();
+      navigate("/store");
     } catch (e) {
       console.log("error", e);
+      set_alertConfig({
+        message: e.message,
+        severity: "error",
+      });
     }
   };
 
   return (
     <div>
-      <Typography variant="h4" sx={{mb: 2}}>Create new assets</Typography>
+      <Typography variant="h4" sx={{ mb: 2 }}>
+        Create new assets
+      </Typography>
       <Grid container spacing={2}>
         <Grid size={6}>
           <Box
@@ -82,14 +143,20 @@ const CreateAsset = () => {
             label="Title"
             variant="outlined"
             margin="normal"
-            sx={{mt: 0}}
+            sx={{ mt: 0 }}
+            name="name"
+            value={newAsset.title}
+            onChange={handleInputChange}
           />
           <TextField
             fullWidth
             select
             label="Category"
+            name="category"
             variant="outlined"
             margin="normal"
+            value={newAsset.category}
+            onChange={handleInputChange}
           >
             {categories.map((category) => (
               <MenuItem key={category} value={category}>
@@ -104,6 +171,9 @@ const CreateAsset = () => {
             margin="normal"
             multiline
             rows={4}
+            name="description"
+            value={newAsset.description}
+            onChange={handleInputChange}
           />
           <TextField
             fullWidth
@@ -111,12 +181,29 @@ const CreateAsset = () => {
             variant="outlined"
             margin="normal"
             type="number"
+            name="price"
+            value={newAsset.price}
+            onChange={handleInputChange}
           />
-          <Button variant="contained" color="primary" onClick={createAsset}>
+          <Button variant="contained" color="primary" onClick={handleCreateAsset}>
             Create Asset
           </Button>
         </Grid>
       </Grid>
+      <Snackbar
+        open={Boolean(alertConfig.message)}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+      >
+        <Alert
+          onClose={handleAlertClose}
+          severity={alertConfig.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {alertConfig.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

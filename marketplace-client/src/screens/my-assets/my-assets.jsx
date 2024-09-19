@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardActions,
@@ -6,49 +6,56 @@ import {
   CardMedia,
   Typography,
   Box,
-  Button,
 } from "@mui/material";
-
-const assets = [
-  {
-    id: 1,
-    image: "https://picsum.photos/seed/picsum/200/300",
-    title: "Asset 1",
-    subtitle: "Subtitle 1",
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/picsum/200/300",
-    title: "Asset 2",
-    subtitle: "Subtitle 2",
-  },
-];
+import { MarketplaceApi } from "../../api";
+import { useMetaMask } from "../../hooks/useMetamask";
 
 const MyAssets = () => {
+  const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
+  const [myassets, set_myassets] = useState([]);
+
+  const getOwnedAssets = async (account) => {
+    try {
+      const res = await MarketplaceApi.getOwnedAssets(account);
+      set_myassets(res.data);
+    } catch (e) {
+      console.log("error", e);
+    }
+  };
+
+  useEffect(() => {
+    if (metamaskProvider) {
+      connectWallet();
+    }
+  }, [metamaskProvider, connectWallet]);
+
+  useEffect(() => {
+    getOwnedAssets(account);
+  }, [account]);
+
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 2 }}>
         My Assets
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {assets.map((asset) => (
+        {myassets.map((asset) => (
           <Card key={asset.id} sx={{ flexBasis: 300 }}>
             <CardMedia
               component="img"
               height="140"
               image={asset.image}
-              alt={asset.title}
+              alt={asset.name}
             />
             <CardContent>
               <Typography gutterBottom variant="h5" component="div">
-                {asset.title}
+                {asset.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {asset.subtitle}
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: "flex-end" }}>
-              <Button size="small">Buy</Button>
             </CardActions>
           </Card>
         ))}

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Typography } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
-import { MarketplaceApi } from "../../api";
 import { ethers } from "ethers";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
@@ -11,10 +10,6 @@ const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 const MyProfile = () => {
   const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
   const [userBalance, set_userBalance] = useState(0);
-
-  useEffect(() => {
-    connectWallet();
-  }, []);
 
   const rechargeMtoken = async (e) => {
     e.preventDefault();
@@ -30,13 +25,13 @@ const MyProfile = () => {
         value: ethers.parseEther("0.5"),
       });
       console.log("txHash", txHash);
+      await getBalance();
     } catch (e) {
       console.log("error", e);
     }
   };
 
-  const getBalance = async (e) => {
-    e.preventDefault();
+  const getBalance = useCallback(async () => {
     try {
       const txSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -49,17 +44,17 @@ const MyProfile = () => {
     } catch (e) {
       console.log("error", e);
     }
-  };
+  }, [metamaskProvider, account]);
 
-  const getOwnedAssets = async (e) => {
-    e.preventDefault();
-    try {
-      const assets = await MarketplaceApi.getOwnedAssets(account);
-      console.log("my assets:", assets);
-    } catch (e) {
-      console.log("error", e);
+  useEffect(() => {
+    if (metamaskProvider) {
+      connectWallet();
     }
-  };
+  }, [metamaskProvider, connectWallet]);
+
+  useEffect(() => {
+    getBalance();
+  }, [account, getBalance]);
 
   return (
     <div>

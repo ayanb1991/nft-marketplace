@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
@@ -15,40 +15,20 @@ import {
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
-const assets = [
-  {
-    id: 1,
-    image: "https://picsum.photos/seed/picsum/200/300",
-    title: "Asset 1",
-    subtitle: "Subtitle 1",
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/picsum/200/300",
-    title: "Asset 2",
-    subtitle: "Subtitle 2",
-  },
-];
-
 const AssetListing = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
+  const [listedAssets, set_listedAssets] = useState([]);
 
-  useEffect(() => {
-    connectWallet();
-  }, []);
-
-  const getAllListedAssets = async (e) => {
-    e.preventDefault();
+  const getAllListedAssets = async () => {
     try {
-      const assets = await MarketplaceApi.getListedAssets();
-      console.log("assets:", assets);
+      const res = await MarketplaceApi.getListedAssets();
+      set_listedAssets(res.data);
     } catch (e) {
       console.log("error", e);
     }
   };
 
-  const removeListing = async (e) => {
-    e.preventDefault();
+  const removeListing = async () => {
     try {
       const metamaskSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -64,8 +44,7 @@ const AssetListing = () => {
     }
   };
 
-  const buyAsset = async (e) => {
-    e.preventDefault();
+  const buyAsset = async () => {
     try {
       const metamaskSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -81,30 +60,42 @@ const AssetListing = () => {
     }
   };
 
+  useEffect(() => {
+    if (metamaskProvider) {
+      connectWallet();
+    }
+  }, [metamaskProvider, connectWallet]);
+
+  useEffect(() => {
+    getAllListedAssets();
+  }, []);
+
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Fresh recommendations
       </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-        {assets.map((asset) => (
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        {listedAssets.map((asset) => (
           <Card key={asset.id} sx={{ flexBasis: 300 }}>
             <CardMedia
               component="img"
               height="140"
               image={asset.image}
-              alt={asset.title}
+              alt={asset.name}
             />
             <CardContent>
               <Typography gutterBottom variant="h5" component="div">
-                {asset.title}
+                {asset.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {asset.subtitle}
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: "flex-end" }}>
-              <Button size="small">Buy</Button>
+              <Button size="small" onClick={buyAsset}>
+                Buy
+              </Button>
             </CardActions>
           </Card>
         ))}
