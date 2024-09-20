@@ -19,7 +19,7 @@ const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const CreateAsset = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
-  const { showAlert, hideAlert } = useContext(AlertContext);
+  const { showAlert } = useContext(AlertContext);
   const navigate = useNavigate();
 
   const categories = ["Car", "Mobile", "Arts", "Stationary", "Electronics"];
@@ -83,6 +83,10 @@ const CreateAsset = () => {
       const tx = await contract.createAsset(price, ipfsURI);
       await tx.wait();
 
+      showAlert({
+        message: "Asset created successfully",
+        severity: "success",
+      });
       // refresh the form
       resetForm();
       navigate("/store");

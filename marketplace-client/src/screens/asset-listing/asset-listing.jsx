@@ -82,7 +82,7 @@ const AssetListing = () => {
             <CardMedia
               component="img"
               height="140"
-              image={asset.image}
+              image={asset.imgUrl}
               alt={asset.name}
             />
             <CardContent>
@@ -90,7 +90,7 @@ const AssetListing = () => {
                 {asset.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {asset.subtitle}
+                {asset.description}
               </Typography>
             </CardContent>
             <CardActions sx={{ justifyContent: "flex-end" }}>

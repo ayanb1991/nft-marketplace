@@ -6,6 +6,10 @@ const IPFSRoutes = require("./routes/ipfs.routes");
 const logger = require('./utilities/logger');
 const events = require('events');
 const cors = require('cors');
+const ipfs = require("./utilities/ipfs-client");
+
+ipfs.createClient();
+
 // fix for libp2p MaxListenersExceededWarning error in helia
 events.setMaxListeners(Infinity);
 

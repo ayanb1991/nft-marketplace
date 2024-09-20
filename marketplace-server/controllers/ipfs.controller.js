@@ -1,14 +1,11 @@
 const ipfs = require("../utilities/ipfs-client");
 const logger = require("../utilities/logger");
 
-const ipfsProvider = new ipfs();
-
 const saveItem = async (req, res) => {
   try {
-    await ipfsProvider.createClient();
-    const { data } = req.body;
-    const _res = await ipfsProvider.add(
-      JSON.stringify(data)
+    logger.info(`Adding data to ipfs, ${JSON.stringify(req.body)}`);
+    const _res = await ipfs.add(
+      JSON.stringify(req.body)
     );
     logger.info(`Data added to ipfs with cid: ${_res.path}`);
     res.status(200).json({ path: _res.path });
@@ -21,8 +18,9 @@ const saveItem = async (req, res) => {
 const getItem = async (req, res) => {
   try {
     const { cid } = req.params;
-    const data = await ipfsProvider.get(cid);
-    res.status(200).json({ data });
+    logger.info(`Fetching data from ipfs with cid: ${cid}`);
+    const data = await ipfs.get(cid);
+    res.status(200).json({ data: data === "" ? "" : JSON.parse(data) });
   } catch (error) {
     console.error(error);
     res.status(500).send(error);

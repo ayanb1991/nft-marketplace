@@ -5,8 +5,6 @@ const web3 = require("web3");
 const ipfs = require("../utilities/ipfs-client");
 const contract = getContractInstance();
 
-const ipfsProvider = new ipfs();
-
 const getAssetById = async (req, res) => {
   try {
     const { assetId } = req.params;
@@ -28,11 +26,17 @@ const listAllAssets = () => {
   const promise = new Promise(async (resolve, reject) => {
     try {
       const lastAssetId =  await contract.methods.getLatestAssetId().call();
+      const lastAssetIdBN = web3.utils.toNumber(lastAssetId);
       let allAssets = [];
-      for (let assetId = 10001; assetId <= Number(lastAssetId.toString()); assetId++) {
+      
+      for (let assetId = 10001; assetId <= lastAssetIdBN; assetId++) {
         const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
-        const ipfsURI = chainData.tokenURI;
-        const ipfsData = await ipfsProvider.get(ipfsURI);
+        const ipfsKey = chainData.tokenURI;
+        let ipfsData = await ipfs.get(ipfsKey) || {};
+        if (typeof ipfsData === "string") {
+          ipfsData = JSON.parse(ipfsData);
+        }
+        console.log("ipfsData:", ipfsData, typeof ipfsData);
         // combine data obtained from chain and ipfs
         const _asset = {
           ...chainData,
@@ -40,11 +44,13 @@ const listAllAssets = () => {
         };
         allAssets.push(_asset);
       }
+      
       resolve(allAssets);
     } catch (error) {
       reject(error);
     }
   });
+  
   return promise;
 };
 
