@@ -2,8 +2,10 @@ const logger = require("../utilities/logger");
 const helpers = require("../utilities/helper");
 const {getContractInstance} = require("../utilities/helper");
 const web3 = require("web3");
-
+const ipfs = require("../utilities/ipfs-client");
 const contract = getContractInstance();
+
+const ipfsProvider = new ipfs();
 
 const getAssetById = async (req, res) => {
   try {
@@ -30,14 +32,11 @@ const listAllAssets = () => {
       for (let assetId = 10001; assetId <= Number(lastAssetId.toString()); assetId++) {
         const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
         const ipfsURI = chainData.tokenURI;
-        // const ipfsRes = await axios.get(
-        //   `${process.env.IPFS_GATEWAY}/${ipfsURI}`
-        // );
-        // const ipfsData = ipfsRes.data;
+        const ipfsData = await ipfsProvider.get(ipfsURI);
         // combine data obtained from chain and ipfs
         const _asset = {
           ...chainData,
-          // ...ipfsData,
+          ...ipfsData,
         };
         allAssets.push(_asset);
       }

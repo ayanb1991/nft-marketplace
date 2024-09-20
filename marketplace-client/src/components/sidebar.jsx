@@ -2,6 +2,7 @@ import React from 'react';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Toolbar } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import ExploreIcon from '@mui/icons-material/Explore';
+import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -11,7 +12,7 @@ const Sidebar = () => {
   const menuItems = [
     { text: 'Store', icon: <HomeIcon />, url: '/store' },
     { text: 'Create Asset', icon: <ExploreIcon />, url: '/asset/create' },
-    { text: 'My Assets', icon: <ExploreIcon />, url: '/asset/owned' },
+    { text: 'My Assets', icon: <PersonIcon />, url: '/asset/owned' },
   ];
 
   const currentPath = location.pathname;

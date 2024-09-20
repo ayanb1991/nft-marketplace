@@ -54,7 +54,12 @@ class IPFSClient {
             })
         }
 
-        return text;
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.warn('Failed to parse JSON, returning raw text');
+            return text;
+        }
     }
 }
 

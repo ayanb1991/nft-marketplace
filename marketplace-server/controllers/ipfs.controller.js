@@ -18,6 +18,18 @@ const saveItem = async (req, res) => {
   }
 }
 
+const getItem = async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const data = await ipfsProvider.get(cid);
+    res.status(200).json({ data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
+  }
+}
+
 module.exports = {
-  saveItem
+  saveItem,
+  getItem
 }

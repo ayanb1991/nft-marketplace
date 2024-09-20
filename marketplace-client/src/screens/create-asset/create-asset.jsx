@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -7,19 +7,19 @@ import {
   TextField,
   MenuItem,
   Box,
-  Snackbar,
-  Alert
 } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
 import { IPFSApi } from "../../api";
 import { PhotoCamera } from "@mui/icons-material";
+import AlertContext from "../../context/alert.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const CreateAsset = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
+  const { showAlert, hideAlert } = useContext(AlertContext);
   const navigate = useNavigate();
 
   const categories = ["Car", "Mobile", "Arts", "Stationary", "Electronics"];
@@ -29,10 +29,6 @@ const CreateAsset = () => {
     description: "",
     price: 0,
     imgUrl: "https://picsum.photos/seed/picsum/200/300",
-  });
-  const [alertConfig, set_alertConfig] = useState({
-    message: "",
-    severity: "success",
   });
 
   useEffect(() => {
@@ -46,17 +42,6 @@ const CreateAsset = () => {
     set_newAsset((prev) => ({ ...prev, [name]: value }));
   };
 
-  const resetAlert = () => {
-    set_alertConfig({
-      message: "",
-      severity: "success",
-    });
-  }
-
-  const handleAlertClose = () => {
-    resetAlert();
-  };
-
   const resetForm = () => {
     set_newAsset({
       name: "",
@@ -65,13 +50,13 @@ const CreateAsset = () => {
       price: 0,
       imgUrl: null,
     });
-  }
+  };
 
   const handleCreateAsset = async (e) => {
     e.preventDefault();
     const { name, category, description, price, imgUrl } = newAsset;
     if (!name || !category || !description || !price || !imgUrl) {
-      set_alertConfig({
+      showAlert({
         message: "All fields are required",
         severity: "error",
       });
@@ -103,7 +88,7 @@ const CreateAsset = () => {
       navigate("/store");
     } catch (e) {
       console.log("error", e);
-      set_alertConfig({
+      showAlert({
         message: e.message,
         severity: "error",
       });
@@ -185,25 +170,15 @@ const CreateAsset = () => {
             value={newAsset.price}
             onChange={handleInputChange}
           />
-          <Button variant="contained" color="primary" onClick={handleCreateAsset}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateAsset}
+          >
             Create Asset
           </Button>
         </Grid>
       </Grid>
-      <Snackbar
-        open={Boolean(alertConfig.message)}
-        autoHideDuration={6000}
-        onClose={handleAlertClose}
-      >
-        <Alert
-          onClose={handleAlertClose}
-          severity={alertConfig.severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {alertConfig.message}
-        </Alert>
-      </Snackbar>
     </div>
   );
 };

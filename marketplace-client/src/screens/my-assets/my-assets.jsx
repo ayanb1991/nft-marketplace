@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { MarketplaceApi } from "../../api";
 import { useMetaMask } from "../../hooks/useMetamask";
+import NoContent from "../../components/no-content";
 
 const MyAssets = () => {
   const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
@@ -39,7 +40,7 @@ const MyAssets = () => {
         My Assets
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {myassets.map((asset) => (
+        {myassets.length > 0 ? myassets.map((asset) => (
           <Card key={asset.id} sx={{ flexBasis: 300 }}>
             <CardMedia
               component="img"
@@ -57,8 +58,10 @@ const MyAssets = () => {
             </CardContent>
             <CardActions sx={{ justifyContent: "flex-end" }}>
             </CardActions>
-          </Card>
-        ))}
+            </Card>
+          )) : (
+          <NoContent message="No assets found" />
+        )}
       </Box>
     </div>
   );

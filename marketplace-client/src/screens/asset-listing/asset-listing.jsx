@@ -12,6 +12,7 @@ import {
   Box,
   Button,
 } from "@mui/material";
+import NoContent from "../../components/no-content";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
@@ -28,21 +29,21 @@ const AssetListing = () => {
     }
   };
 
-  const removeListing = async () => {
-    try {
-      const metamaskSigner = await metamaskProvider.getSigner();
-      const contract = await connectToContract(
-        contractAddress,
-        nftMarketPlaceAbi,
-        metamaskSigner
-      );
+  // const removeListing = async () => {
+  //   try {
+  //     const metamaskSigner = await metamaskProvider.getSigner();
+  //     const contract = await connectToContract(
+  //       contractAddress,
+  //       nftMarketPlaceAbi,
+  //       metamaskSigner
+  //     );
 
-      const res = await contract.removeAsset(10001);
-      console.log("res:", res);
-    } catch (e) {
-      console.log("error", e);
-    }
-  };
+  //     const res = await contract.removeAsset(10001);
+  //     console.log("res:", res);
+  //   } catch (e) {
+  //     console.log("error", e);
+  //   }
+  // };
 
   const buyAsset = async () => {
     try {
@@ -76,7 +77,7 @@ const AssetListing = () => {
         Fresh recommendations
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {listedAssets.map((asset) => (
+        {listedAssets.length > 0 ? listedAssets.map((asset) => (
           <Card key={asset.id} sx={{ flexBasis: 300 }}>
             <CardMedia
               component="img"
@@ -96,9 +97,11 @@ const AssetListing = () => {
               <Button size="small" onClick={buyAsset}>
                 Buy
               </Button>
-            </CardActions>
-          </Card>
-        ))}
+              </CardActions>
+            </Card>
+          )) : (
+          <NoContent message="No assets found" />
+        )}
       </Box>
     </div>
   );
