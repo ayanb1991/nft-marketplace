@@ -10,6 +10,7 @@ import {
 import { MarketplaceApi } from "../../api";
 import { useMetaMask } from "../../hooks/useMetamask";
 import NoContent from "../../components/no-content";
+import AssetItem from "../../components/asset-item";
 
 const MyAssets = () => {
   const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
@@ -31,7 +32,9 @@ const MyAssets = () => {
   }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
-    getOwnedAssets(account);
+    if (account) {
+      getOwnedAssets(account);
+    }
   }, [account]);
 
   return (
@@ -40,26 +43,9 @@ const MyAssets = () => {
         My Assets
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-        {myassets.length > 0 ? myassets.map((asset) => (
-          <Card key={asset.id} sx={{ flexBasis: 300 }}>
-            <CardMedia
-              component="img"
-              height="140"
-              image={asset.image}
-              alt={asset.name}
-            />
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                {asset.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {asset.subtitle}
-              </Typography>
-            </CardContent>
-            <CardActions sx={{ justifyContent: "flex-end" }}>
-            </CardActions>
-            </Card>
-          )) : (
+        {myassets.length > 0 ? (
+          myassets.map((asset) => <AssetItem key={asset.id} asset={asset} showActions={false} />)
+        ) : (
           <NoContent message="No assets found" />
         )}
       </Box>

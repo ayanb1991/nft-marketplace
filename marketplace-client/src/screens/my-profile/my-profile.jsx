@@ -21,10 +21,11 @@ const MyProfile = () => {
         metamaskSigner
       );
 
-      const txHash = await contract.buyTokens({
-        value: ethers.parseEther("0.5"),
+      const tx = await contract.buyTokens({
+        value: ethers.parseEther("10"),
       });
-      console.log("txHash", txHash);
+      await tx.wait();
+      console.log("txHash", tx);
       await getBalance();
     } catch (e) {
       console.log("error", e);
