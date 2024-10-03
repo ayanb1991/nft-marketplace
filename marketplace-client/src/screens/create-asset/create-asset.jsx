@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   Typography,
@@ -8,12 +8,14 @@ import {
   MenuItem,
   Box,
 } from "@mui/material";
+import { ethers } from "ethers";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
 import { IPFSApi } from "../../api";
 import { PhotoCamera } from "@mui/icons-material";
 import AlertContext from "../../context/alert.context";
+import marketplaceApi from "../../api/marketplace.api";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
@@ -21,6 +23,10 @@ const CreateAsset = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
   const { showAlert } = useContext(AlertContext);
   const navigate = useNavigate();
+  const { assetId } = useParams();
+
+  // check if this is an update action
+  const isUpdateAction = !!assetId;
 
   const categories = ["Car", "Mobile", "Arts", "Stationary", "Electronics"];
   const [newAsset, set_newAsset] = useState({
@@ -37,6 +43,26 @@ const CreateAsset = () => {
     }
   }, [metamaskProvider, connectWallet]);
 
+  useEffect(() => {
+    if (isUpdateAction && assetId) {
+      // fetch asset data
+      fetchAssetDetails(assetId);
+    }
+  }, []);
+
+  const fetchAssetDetails = async (assetId) => {
+    try {
+      const res = await marketplaceApi.getAssetById(assetId);
+      const asset = res.data.asset;
+      console.log("asset", asset);
+    } catch (error) {
+      showAlert({
+        message: error.message,
+        severity: "error",
+      });
+    }
+  }
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     set_newAsset((prev) => ({ ...prev, [name]: value }));
@@ -52,8 +78,7 @@ const CreateAsset = () => {
     });
   };
 
-  const handleCreateAsset = async (e) => {
-    e.preventDefault();
+  const validateForm = () => {
     const { name, category, description, price, imgUrl } = newAsset;
     if (!name || !category || !description || !price || !imgUrl) {
       showAlert({
@@ -62,10 +87,15 @@ const CreateAsset = () => {
       });
       return;
     }
+  };
+
+  const handleCreateAsset = async (e) => {
+    e.preventDefault();
+    validateForm();
     await createAsset(e);
   };
 
-  const createAsset = async (e) => {
+  const createAsset = async () => {
     try {
       const metamaskSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -74,13 +104,15 @@ const CreateAsset = () => {
         metamaskSigner
       );
       // save data to ipfs and obtain url
-      const price = 5;
       const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
       console.log("ipfsURI", ipfsURI);
 
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");
 
-      const tx = await contract.createAsset(price, ipfsURI);
+      const tx = await contract.createAsset(
+        ethers.formatUnits(newAsset.price),
+        ipfsURI
+      );
       await tx.wait();
 
       showAlert({
@@ -99,10 +131,48 @@ const CreateAsset = () => {
     }
   };
 
+  const relistAsset = async (e) => {
+    try {
+      validateForm();
+
+      const metamaskSigner = await metamaskProvider.getSigner();
+      const contract = await connectToContract(
+        contractAddress,
+        nftMarketPlaceAbi,
+        metamaskSigner
+      );
+      // save data to ipfs and obtain url
+      const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
+      console.log("ipfsURI", ipfsURI);
+
+      if (!ipfsURI) throw new Error("failed to obtain ipfs url");
+
+      const tx = await contract.reListAsset(
+        ethers.formatUnits(newAsset.price),
+        ipfsURI
+      );
+      await tx.wait();
+
+      showAlert({
+        message: "Asset posted to store successfully",
+        severity: "success",
+      });
+      // refresh the form
+      resetForm();
+      navigate("/store");
+    } catch (e) {
+      console.log("error", e);
+      showAlert({
+        message: e.message,
+        severity: "error",
+      });
+    }
+  };
+
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 2 }}>
-        Create new assets
+        {isUpdateAction ? "Update Asset" : "Create New Asset"}
       </Typography>
       <Grid container spacing={2}>
         <Grid size={6}>
@@ -134,7 +204,7 @@ const CreateAsset = () => {
             margin="normal"
             sx={{ mt: 0 }}
             name="name"
-            value={newAsset.title}
+            value={newAsset.name}
             onChange={handleInputChange}
           />
           <TextField
@@ -174,13 +244,20 @@ const CreateAsset = () => {
             value={newAsset.price}
             onChange={handleInputChange}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateAsset}
-          >
-            Create Asset
-          </Button>
+          {!isUpdateAction ? (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCreateAsset}
+            >
+              Create Asset
+            </Button>
+          ) : null}
+          {isUpdateAction ? (
+            <Button variant="contained" color="primary" onClick={relistAsset}>
+              Put On Store
+            </Button>
+          ) : null}
         </Grid>
       </Grid>
     </div>

@@ -3,7 +3,7 @@ import Login from "./screens/login/login";
 import Signup from "./screens/signup/signup";
 import AssetListing from "./screens/asset-listing/asset-listing";
 import MyProfile from "./screens/my-profile/my-profile";
-import CreateAsset from "./screens/create-asset/create-asset";
+import ManageAsset from "./screens/create-asset/create-asset";
 import MyAssets from "./screens/my-assets/my-assets";
 import AuthenticatedRoutes from "./components/authenticated-routes";
 import Frame from "./components/frame";
@@ -28,7 +28,8 @@ function App() {
         <Frame>
           <Routes>
             <Route path="/store" element={<AssetListing />} />
-            <Route path="/asset/create" element={<CreateAsset />} />
+            <Route path="/asset/create" element={<ManageAsset />} />
+            <Route path="/asset/update/:assetId" element={<ManageAsset />} />
             <Route path="/asset/owned" element={<MyAssets />} />
             <Route path="/profile" element={<MyProfile />} />
             <Route path="*" element={<Navigate to="/store" />} />

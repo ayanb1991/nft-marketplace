@@ -10,9 +10,22 @@ const getAssetById = async (req, res) => {
     const { assetId } = req.params;
 
     logger.info(`getting asset ${assetId}`);
-    const asset = await contract.methods.getAsset(assetId).call();
-    if (asset.tokenId) {
-      res.status(200).json({ asset });
+    const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
+
+    const ipfsKey = chainData.tokenURI;
+    let ipfsData = await ipfs.get(ipfsKey) || {};
+    if (typeof ipfsData === "string") {
+      ipfsData = JSON.parse(ipfsData);
+    }
+    console.log("ipfsData:", ipfsData, typeof ipfsData);
+
+    // combine data obtained from chain and ipfs
+    const _asset = {
+      ...chainData,
+      ...ipfsData,
+    };
+    if (_asset.tokenId) {
+      res.status(200).json({ asset: _asset });
     } else {
       res.status(404).send("Asset not found");
     }
@@ -31,6 +44,10 @@ const listAllAssets = () => {
       
       for (let assetId = 10001; assetId <= lastAssetIdBN; assetId++) {
         const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
+        // need to exclude assets that are already sold
+        if (chainData.price === 0) {
+          continue;
+        }
         const ipfsKey = chainData.tokenURI;
         let ipfsData = await ipfs.get(ipfsKey) || {};
         if (typeof ipfsData === "string") {

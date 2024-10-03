@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
 import { MarketplaceApi } from "../../api";
-import {
-  Typography,
-  Box,
-} from "@mui/material";
+import { Typography, Box, Button } from "@mui/material";
 import NoContent from "../../components/no-content";
 import AssetItem from "../../components/asset-item";
 import AlertContext from "../../context/alert.context";
@@ -68,7 +65,6 @@ const AssetListing = () => {
       });
       // navigate to my-assets page
       navigate("/my-assets");
-
     } catch (e) {
       console.log("error", e);
       showAlert({
@@ -77,19 +73,6 @@ const AssetListing = () => {
       });
     }
   };
-
-  const assetActionHandler = (action, asset) => {
-    switch (action) {
-      case "remove":
-        removeListing(asset?.tokenId);
-        break;
-      case "buy":
-        buyAsset(asset?.tokenId);
-        break;
-      default:
-        break;
-    }
-  }
 
   useEffect(() => {
     if (metamaskProvider) {
@@ -109,7 +92,30 @@ const AssetListing = () => {
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {listedAssets.length > 0 ? (
           listedAssets.map((asset) => (
-            <AssetItem key={asset.id} asset={asset} onAction={assetActionHandler} />
+            <AssetItem
+              key={asset.id}
+              asset={asset}
+              actionRenders={() => {
+                return (
+                  <Fragment>
+                    <Button
+                      size="small"
+                      sx={{ mr: 10 }}
+                      onClick={() => buyAsset(asset)}
+                    >
+                      Buy
+                    </Button>
+                    <Button
+                      size="small"
+                      sx={{ mr: 10 }}
+                      onClick={() => removeListing(asset)}
+                    >
+                      Remove
+                    </Button>
+                  </Fragment>
+                );
+              }}
+            />
           ))
         ) : (
           <NoContent message="No assets found" />

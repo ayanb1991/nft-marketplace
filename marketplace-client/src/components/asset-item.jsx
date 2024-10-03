@@ -5,11 +5,10 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Button,
 } from "@mui/material";
 
 const AssetItem = (props) => {
-  const { asset, onAction, showActions } = props;
+  const { asset, actionRenders } = props;
   return (
     <Card key={asset.id} sx={{ flexBasis: 300 }}>
       <CardMedia
@@ -26,21 +25,16 @@ const AssetItem = (props) => {
           {asset?.description}
         </Typography>
       </CardContent>
-      {showActions ? (
-        <CardActions sx={{ justifyContent: "flex-end" }}>
-          <Button size="small" onClick={() => onAction("buy", asset)}>
-            Buy
-          </Button>
-        </CardActions>
-      ) : null}
+      <CardActions sx={{ justifyContent: "flex-end" }}>
+        {actionRenders && actionRenders(asset)}
+      </CardActions>
     </Card>
   );
 };
 
 AssetItem.defaultProps = {
-  showActions: true,
   asset: {},
-  onAction: () => {},
+  actionRenders: () => null,
 };
 
 export default AssetItem;
