@@ -7,8 +7,10 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/auth.context';
 
 const Header = () => {
+  const { logOut } = useAuth();
   const navigate = useNavigate();
   
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -21,8 +23,13 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    closeMenu()
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      navigate("/login"); // Redirect to the login page after logout
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (

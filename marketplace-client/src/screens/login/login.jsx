@@ -1,16 +1,33 @@
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TextField, Button, Container, Box, Typography } from '@mui/material';
 import { Person, Lock } from '@mui/icons-material';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../utilities/firebase';
+import { useAuth } from '../../context/auth.context';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  if (user) {
+    navigate('/asset/listing');
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login submitted', { username, password });
+    try {
+      console.log('Login submitted', { username, password });
+      const loginRes = await signInWithEmailAndPassword(auth, username, password);
+      console.log('loginRes', loginRes);
+      // redirect to '/store' after successful login
+      navigate('/asset/listing');
+    } catch (error) {
+      console.error("Error signing in:", error.message);
+    }
   };
 
   return (

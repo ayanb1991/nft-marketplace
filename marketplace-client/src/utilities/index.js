@@ -20,6 +20,19 @@ export const connectToContract = async (contractAddress, contractABI, signer) =>
 
 export const getLocalSigner = async (providerUrl = 'http://127.0.0.1:8545') => {
   const provider = new ethers.JsonRpcProvider(providerUrl);
-  const signer = await provider.getSigner();
-  return signer;
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const signer = await provider.getSigner();
+      return signer;
+    } catch (error) {
+      if (retries === 1) {
+        console.error('Error getting signer:', error);
+        throw error;
+      }
+      retries--;
+      console.log(`Retrying... (${3 - retries}/3)`);
+      await new Promise(res => setTimeout(res, 1000)); // wait 1 second before retrying
+    }
+  }
 };

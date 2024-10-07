@@ -4,27 +4,6 @@ const { getContractInstance } = require("../utilities/helper");
 
 const contract = getContractInstance();
 
-const signup = async (req, res) => {
-  try {
-    const { email, password, displayName } = req.body;
-    const _user = {
-      email,
-      password,
-      displayName
-    };
-    logger.info(`signing up user with data ${JSON.stringify(_user)}`);
-    const userRecord = await AuthController.signup(_user);
-
-    return res.status(201).json({
-      message: 'User created successfully',
-      uid: userRecord.uid,
-    });
-  } catch (error) {
-    logger.error(error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
-
 const logout = async (req, res) => {
   try {
     const { uid } = req.body;

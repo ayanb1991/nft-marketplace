@@ -12,7 +12,7 @@ import AlertContext from "../../context/alert.context";
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const AssetListing = () => {
-  const { provider: metamaskProvider, connectWallet } = useMetaMask();
+  const { provider: metamaskProvider } = useMetaMask();
   const [listedAssets, set_listedAssets] = useState([]);
   const { showAlert } = useContext(AlertContext);
   const navigate = useNavigate();
@@ -73,12 +73,6 @@ const AssetListing = () => {
       });
     }
   };
-
-  useEffect(() => {
-    if (metamaskProvider) {
-      connectWallet();
-    }
-  }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
     getAllListedAssets();

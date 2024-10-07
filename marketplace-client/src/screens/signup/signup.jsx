@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Container, Typography, TextField, Button, Box } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract, getLocalSigner } from "../../utilities";
+import { createAccount } from "../../utilities/firebase";
+import { useAuth } from "../../context/auth.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const { account, connectWallet } = useMetaMask();
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    connectWallet();
-  }, []);
+  if (user) {
+    navigate('/asset/listing');
+  }
 
-  const generateMtoken = async () => {
+  const giftSignupCredits = async () => {
     try {
       // here runner or signer is contract deployer from hardhat predefined accounts
       const localSigner = await getLocalSigner();
@@ -26,16 +31,28 @@ const Signup = () => {
         nftMarketPlaceAbi,
         localSigner
       );
-      const txHash = await contract.generateMTOKENS(account, 100);
-      console.log("txHash", txHash);
+      const tx = await contract.generateMTOKENS(account, 100);
+      await tx.wait();
+
+      console.log("tx", tx);
     } catch (e) {
       console.log("error", e);
     }
   };
 
   const handleSignup = async () => {
-    // Handle signup logic here
-    await generateMtoken();
+    try {
+      // connect to metamask wallet
+      await connectWallet();
+      const newUser = await createAccount(email, password, fullname, account);
+      // if user is created successfully, gift signup credits
+      if (newUser) {
+        await giftSignupCredits();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Error creating user:", error);
+    }
   };
 
   return (
