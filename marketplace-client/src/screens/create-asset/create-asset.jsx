@@ -8,7 +8,6 @@ import {
   MenuItem,
   Box,
 } from "@mui/material";
-import { ethers } from "ethers";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract } from "../../utilities";
@@ -36,12 +35,6 @@ const CreateAsset = () => {
     price: 0,
     imgUrl: "https://picsum.photos/seed/picsum/200/300",
   });
-
-  useEffect(() => {
-    if (metamaskProvider) {
-      connectWallet();
-    }
-  }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
     if (isUpdateAction && assetId) {
@@ -85,13 +78,17 @@ const CreateAsset = () => {
         message: "All fields are required",
         severity: "error",
       });
-      return;
+      return false;
     }
+
+    return true;
   };
 
   const handleCreateAsset = async (e) => {
     e.preventDefault();
-    validateForm();
+    if (!validateForm()) return;
+
+    await connectWallet();
     await createAsset(e);
   };
 
@@ -110,7 +107,7 @@ const CreateAsset = () => {
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");
 
       const tx = await contract.createAsset(
-        ethers.formatUnits(newAsset.price),
+        parseInt(newAsset.price),
         ipfsURI
       );
       await tx.wait();
@@ -121,7 +118,7 @@ const CreateAsset = () => {
       });
       // refresh the form
       resetForm();
-      navigate("/store");
+      navigate("/asset/listing");
     } catch (e) {
       console.log("error", e);
       showAlert({
@@ -133,8 +130,9 @@ const CreateAsset = () => {
 
   const relistAsset = async (e) => {
     try {
-      validateForm();
+      if (!validateForm()) return;
 
+      await connectWallet();
       const metamaskSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
         contractAddress,
@@ -148,7 +146,8 @@ const CreateAsset = () => {
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");
 
       const tx = await contract.reListAsset(
-        ethers.formatUnits(newAsset.price),
+        assetId,
+        parseInt(newAsset.price),
         ipfsURI
       );
       await tx.wait();
@@ -159,7 +158,7 @@ const CreateAsset = () => {
       });
       // refresh the form
       resetForm();
-      navigate("/store");
+      navigate("/asset/listing");
     } catch (e) {
       console.log("error", e);
       showAlert({

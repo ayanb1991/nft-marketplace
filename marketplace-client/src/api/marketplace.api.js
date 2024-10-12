@@ -6,6 +6,8 @@ const marketplaceApi = {
   getListedAssets: () => axiosInstance.get(`/asset/listed`),
 
   getOwnedAssets: (ownerAddress) => axiosInstance.get(`/asset/owned/${ownerAddress}`),
+
+  getAssetOwnershipHistory: (assetId) => axiosInstance.get(`/asset/history/${assetId}`),
 };
 
 export default marketplaceApi;

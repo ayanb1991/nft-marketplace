@@ -1,6 +1,6 @@
 const logger = require("../utilities/logger");
 const helpers = require("../utilities/helper");
-const {getContractInstance} = require("../utilities/helper");
+const { getContractInstance } = require("../utilities/helper");
 const web3 = require("web3");
 const ipfs = require("../utilities/ipfs-client");
 const contract = getContractInstance();
@@ -10,10 +10,12 @@ const getAssetById = async (req, res) => {
     const { assetId } = req.params;
 
     logger.info(`getting asset ${assetId}`);
-    const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
+    const chainData = helpers.parseAsset(
+      await contract.methods.getAsset(assetId).call()
+    );
 
     const ipfsKey = chainData.tokenURI;
-    let ipfsData = await ipfs.get(ipfsKey) || {};
+    let ipfsData = (await ipfs.get(ipfsKey)) || {};
     if (typeof ipfsData === "string") {
       ipfsData = JSON.parse(ipfsData);
     }
@@ -33,23 +35,21 @@ const getAssetById = async (req, res) => {
     logger.error(error.message);
     res.status(500).send(error);
   }
-}
+};
 
 const listAllAssets = () => {
   const promise = new Promise(async (resolve, reject) => {
     try {
-      const lastAssetId =  await contract.methods.getLatestAssetId().call();
+      const lastAssetId = await contract.methods.getLatestAssetId().call();
       const lastAssetIdBN = web3.utils.toNumber(lastAssetId);
       let allAssets = [];
-      
+
       for (let assetId = 10001; assetId <= lastAssetIdBN; assetId++) {
-        const chainData = helpers.parseAsset(await contract.methods.getAsset(assetId).call());
-        // need to exclude assets that are already sold
-        if (chainData.price === 0) {
-          continue;
-        }
+        const chainData = helpers.parseAsset(
+          await contract.methods.getAsset(assetId).call()
+        );
         const ipfsKey = chainData.tokenURI;
-        let ipfsData = await ipfs.get(ipfsKey) || {};
+        let ipfsData = (await ipfs.get(ipfsKey)) || {};
         if (typeof ipfsData === "string") {
           ipfsData = JSON.parse(ipfsData);
         }
@@ -61,13 +61,13 @@ const listAllAssets = () => {
         };
         allAssets.push(_asset);
       }
-      
+
       resolve(allAssets);
     } catch (error) {
       reject(error);
     }
   });
-  
+
   return promise;
 };
 
@@ -76,8 +76,13 @@ const getOwnedItems = async (req, res, next) => {
     const { address } = req.params;
 
     const allAssets = await listAllAssets();
-    const ownedItems = allAssets.filter((el) => web3.utils.toChecksumAddress(el.currentOwner) === web3.utils.toChecksumAddress(address)) || [];
-    
+    const ownedItems =
+      allAssets.filter(
+        (el) =>
+          web3.utils.toChecksumAddress(el.currentOwner) ===
+          web3.utils.toChecksumAddress(address)
+      ) || [];
+
     res.status(200).send(ownedItems);
   } catch (error) {
     logger.error(error.message);
@@ -97,9 +102,44 @@ const getListedAssets = async (req, res, next) => {
   }
 };
 
+const getAssetOwnershipHistory = async (req, res, next) => {
+  try {
+    const { assetId } = req.params;
+
+    // Get past events
+    const events = await contract.getPastEvents("AssetTransfer", {
+      filter: { tokenId: assetId },
+      fromBlock: 0,
+      toBlock: "latest",
+    });
+
+    // Sort events by block number to ensure chronological order
+    events.sort((a, b) => a.blockNumber - b.blockNumber);
+
+    const ownershipHistory = events.map((event) => {
+      return {
+        fromOwner: event.returnValues.from,
+        toOwner: event.returnValues.to,
+        blockNumber: web3.utils.toNumber(event.blockNumber),
+        transactionHash: event.transactionHash,
+      };
+    });
+
+    res.status(200).send({
+      currentOwner: ownershipHistory[ownershipHistory.length - 1].toOwner,
+      history: ownershipHistory,
+    });
+
+  } catch (error) {
+    logger.error(error.message);
+    res.status(500).send(error);
+  }
+};
+
 module.exports = {
   getAssetById,
   getOwnedItems,
   getListedAssets,
   listAllAssets,
-}
+  getAssetOwnershipHistory
+};

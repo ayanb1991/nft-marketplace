@@ -64,7 +64,7 @@ const AssetListing = () => {
         severity: "success",
       });
       // navigate to my-assets page
-      navigate("/my-assets");
+      navigate("/asset/my-assets");
     } catch (e) {
       console.log("error", e);
       showAlert({
@@ -94,15 +94,13 @@ const AssetListing = () => {
                   <Fragment>
                     <Button
                       size="small"
-                      sx={{ mr: 10 }}
-                      onClick={() => buyAsset(asset)}
+                      onClick={() => buyAsset(asset?.tokenId)}
                     >
                       Buy
                     </Button>
                     <Button
                       size="small"
-                      sx={{ mr: 10 }}
-                      onClick={() => removeListing(asset)}
+                      onClick={() => removeListing(asset?.tokenId)}
                     >
                       Remove
                     </Button>

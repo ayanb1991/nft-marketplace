@@ -40,6 +40,7 @@ const MyAssets = () => {
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {myassets.length > 0 ? (
           myassets.map((asset) => (
+            // TODO: put on sale will only work if the asset is not already on sale
             <AssetItem
               key={asset.id}
               asset={asset}
@@ -48,8 +49,7 @@ const MyAssets = () => {
                   <Fragment>
                     <Button
                       size="small"
-                      sx={{ mr: 10 }}
-                      onClick={() => navigate(`/asset/update/${asset.id}`)}
+                      onClick={() => navigate(`/asset/update/${asset.tokenId}`)}
                     >
                       Put On Sale
                     </Button>

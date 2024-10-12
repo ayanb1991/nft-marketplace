@@ -18,8 +18,11 @@ const AssetItem = (props) => {
         alt={asset?.name}
       />
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+        <Typography gutterBottom variant="body2" component="div">
           {asset?.name}
+        </Typography>
+        <Typography gutterBottom variant="h6" component="div">
+          {asset?.price} MTOKEN
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {asset?.description}

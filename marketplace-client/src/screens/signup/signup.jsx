@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Container, Typography, TextField, Button, Box } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
@@ -6,11 +6,14 @@ import { nftMarketPlaceAbi } from "../../utilities/abi";
 import { connectToContract, getLocalSigner } from "../../utilities";
 import { createAccount } from "../../utilities/firebase";
 import { useAuth } from "../../context/auth.context";
+import AlertContext from "../../context/alert.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { showAlert } = useContext(AlertContext);
+
   const { user } = useAuth();
 
   const { account, connectWallet } = useMetaMask();
@@ -31,12 +34,16 @@ const Signup = () => {
         nftMarketPlaceAbi,
         localSigner
       );
-      const tx = await contract.generateMTOKENS(account, 100);
+      const tx = await contract.generateMTOKENS(account, 500);
       await tx.wait();
 
       console.log("tx", tx);
-    } catch (e) {
-      console.log("error", e);
+    } catch (error) {
+      console.log("error", error);
+      showAlert({
+        message: error.message,
+        severity: "error",
+      });
     }
   };
 
@@ -52,6 +59,10 @@ const Signup = () => {
       }
     } catch (error) {
       console.error("Error creating user:", error);
+      showAlert({
+        message: error.message,
+        severity: "error",
+      });
     }
   };
 

@@ -33,6 +33,7 @@ const MyProfile = () => {
   };
 
   const getBalance = useCallback(async () => {
+    if (!metamaskProvider) return;
     try {
       const txSigner = await metamaskProvider.getSigner();
       const contract = await connectToContract(
@@ -54,7 +55,9 @@ const MyProfile = () => {
   }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
-    getBalance();
+    if (account) {
+      getBalance();
+    }
   }, [account, getBalance]);
 
   return (

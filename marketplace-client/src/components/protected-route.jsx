@@ -4,7 +4,6 @@ import { CircularProgress } from "@mui/material";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  console.log("ProtectedRoute ~ user:", user)
 
   if (loading) {
     return (

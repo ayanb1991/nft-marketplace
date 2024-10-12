@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { TextField, Button, Container, Box, Typography } from '@mui/material';
 import { Person, Lock } from '@mui/icons-material';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../utilities/firebase';
 import { useAuth } from '../../context/auth.context';
+import AlertContext from '../../context/alert.context';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { showAlert } = useContext(AlertContext);
+
   const { user } = useAuth();
 
   const [username, setUsername] = useState('');
@@ -27,6 +30,10 @@ const Login = () => {
       navigate('/asset/listing');
     } catch (error) {
       console.error("Error signing in:", error.message);
+      showAlert({
+        message: error.message,
+        severity: "error",
+      });
     }
   };
 

@@ -117,7 +117,7 @@ contract Marketplace is ERC1155, Ownable, Pausable {
         // in re listing, we are not minting fresh NFT, just updating the price and ipfsTokenURI
         console.log("Asset to update: %s", assetId);
         AssetListing memory listing = _listings[assetId];
-        require(listing.price > 0, "Re listing not possible, Asset is already listed for sell");
+        require(listing.price == 0, "Re listing not possible, Asset is already listed for sell");
 
         address seller = ownerOf(assetId);
         require(seller == msg.sender, "You are not the owner of this asset");
