@@ -47,14 +47,41 @@ const Signup = () => {
     }
   };
 
+  const validateForm = () => {
+    if (!fullname || !email || !password ) {
+      showAlert({
+        message: "Please fill all the fields.",
+        severity: "error",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+
   const handleSignup = async () => {
     try {
+      if (!validateForm()) return;
+
       // connect to metamask wallet
       await connectWallet();
+      // check if account is connected
+      if (!account) {
+        showAlert({
+          message: "Please connect your metamask wallet",
+          severity: "error",
+        });
+        return false;
+      }
+
       const newUser = await createAccount(email, password, fullname, account);
       // if user is created successfully, gift signup credits
       if (newUser) {
         await giftSignupCredits();
+        showAlert({
+          message: "You have successfully signed up. Please login to continue",
+        });
         navigate("/login");
       }
     } catch (error) {

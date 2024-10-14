@@ -3,7 +3,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -11,8 +11,9 @@ const firebaseConfig = {
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
 };
 
-// Initialize Firebase
+// Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
+const db = getFirestore();
 
 export const auth = getAuth(app);
 
@@ -25,9 +26,6 @@ export const isAuthenticated = () => {
 };
 
 export const createAccount = async (email, password, fullName, eoaAddress) => {
-  // implement firebase create account here
-  const auth = getAuth();
-  const db = getFirestore();
 
   try {
     // Create user with email and password
@@ -50,4 +48,9 @@ export const createAccount = async (email, password, fullName, eoaAddress) => {
     console.error("Error creating user:", error);
     throw error;
   }
+};
+
+export const fetchUserData = async (uid) => {
+  const userDoc = await getDoc(doc(db, 'users', uid));
+  return userDoc.exists() ? userDoc.data() : null;
 };

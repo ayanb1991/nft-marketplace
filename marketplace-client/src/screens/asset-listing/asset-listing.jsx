@@ -6,7 +6,7 @@ import { connectToContract } from "../../utilities";
 import { MarketplaceApi } from "../../api";
 import { Typography, Box, Button } from "@mui/material";
 import NoContent from "../../components/no-content";
-import AssetItem from "../../components/asset-item";
+import AssetItem from "../../components/store-asset-item";
 import AlertContext from "../../context/alert.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
@@ -64,7 +64,7 @@ const AssetListing = () => {
         severity: "success",
       });
       // navigate to my-assets page
-      navigate("/asset/my-assets");
+      navigate("/asset/owned");
     } catch (e) {
       console.log("error", e);
       showAlert({
@@ -87,7 +87,7 @@ const AssetListing = () => {
         {listedAssets.length > 0 ? (
           listedAssets.map((asset) => (
             <AssetItem
-              key={asset.id}
+              key={asset.tokenId}
               asset={asset}
               actionRenders={() => {
                 return (
@@ -98,11 +98,17 @@ const AssetListing = () => {
                     >
                       Buy
                     </Button>
-                    <Button
+                    {/* <Button
                       size="small"
                       onClick={() => removeListing(asset?.tokenId)}
                     >
                       Remove
+                    </Button> */}
+                    <Button
+                      size="small"
+                      onClick={() => navigate(`/asset/history/${asset.tokenId}`)}
+                    >
+                      History
                     </Button>
                   </Fragment>
                 );

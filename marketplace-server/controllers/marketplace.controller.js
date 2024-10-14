@@ -107,14 +107,11 @@ const getAssetOwnershipHistory = async (req, res, next) => {
     const { assetId } = req.params;
 
     // Get past events
-    const events = await contract.getPastEvents("AssetTransfer", {
+    let events = await contract.getPastEvents("AssetTransfer", {
       filter: { tokenId: assetId },
       fromBlock: 0,
       toBlock: "latest",
     });
-
-    // Sort events by block number to ensure chronological order
-    events.sort((a, b) => a.blockNumber - b.blockNumber);
 
     const ownershipHistory = events.map((event) => {
       return {
@@ -124,6 +121,9 @@ const getAssetOwnershipHistory = async (req, res, next) => {
         transactionHash: event.transactionHash,
       };
     });
+
+    // Sort events by block number to ensure chronological order
+    ownershipHistory.sort((a, b) => a.blockNumber - b.blockNumber);
 
     res.status(200).send({
       currentOwner: ownershipHistory[ownershipHistory.length - 1].toOwner,

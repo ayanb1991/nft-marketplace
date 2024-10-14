@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../utilities/firebase';
-import { onAuthStateChanged , signOut } from 'firebase/auth';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth, fetchUserData } from "../utilities/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const AuthContext = createContext({});
 
@@ -15,6 +15,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      // fetch user data from firestore and merge it with user object
+      if (user) {
+        fetchUserData(user.uid).then((userData) => {
+          if (userData) {
+            setUser({ ...user, ...userData });
+          } else {
+            setUser(user);
+          }
+        });
+      } else {
+        setUser(null);
+      }
+
       setUser(user);
       setLoading(false);
     });

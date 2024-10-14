@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useCallback } from 'react';
 import AlertComponent from '../components/alert';
 
 const AlertContext = createContext();
@@ -10,16 +10,16 @@ export const AlertContextProvider = ({ children }) => {
     severity: "success",
   });
 
-  const showAlert = (config) => {
+  const showAlert = useCallback((config) => {
     set_alertConfig(config);
-  };
+  }, []);
 
-  const hideAlert = () => {
+  const hideAlert = useCallback(() => {
     set_alertConfig({
       message: "",
       severity: "success",
     });
-  };
+  }, []);
 
   const value = {
     showAlert,

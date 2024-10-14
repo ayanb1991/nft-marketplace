@@ -26,7 +26,7 @@ const Login = () => {
       console.log('Login submitted', { username, password });
       const loginRes = await signInWithEmailAndPassword(auth, username, password);
       console.log('loginRes', loginRes);
-      // redirect to '/store' after successful login
+      // redirect to asset listing after successful login
       navigate('/asset/listing');
     } catch (error) {
       console.error("Error signing in:", error.message);

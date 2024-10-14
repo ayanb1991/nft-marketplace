@@ -15,12 +15,14 @@ import { IPFSApi } from "../../api";
 import { PhotoCamera } from "@mui/icons-material";
 import AlertContext from "../../context/alert.context";
 import marketplaceApi from "../../api/marketplace.api";
+import LoaderContext from "../../context/loader.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const CreateAsset = () => {
   const { provider: metamaskProvider, connectWallet } = useMetaMask();
   const { showAlert } = useContext(AlertContext);
+  const { showLoader, hideLoader } = useContext(LoaderContext);
   const navigate = useNavigate();
   const { assetId } = useParams();
 
@@ -33,7 +35,7 @@ const CreateAsset = () => {
     category: "",
     description: "",
     price: 0,
-    imgUrl: "https://picsum.photos/seed/picsum/200/300",
+    imgUrl: `${process.env.PUBLIC_URL}/used-laptop.jpg`,
   });
 
   useEffect(() => {
@@ -45,14 +47,24 @@ const CreateAsset = () => {
 
   const fetchAssetDetails = async (assetId) => {
     try {
+      await showLoader();
       const res = await marketplaceApi.getAssetById(assetId);
       const asset = res.data.asset;
       console.log("asset", asset);
+      set_newAsset({
+        name: asset.name,
+        category: asset.category,
+        description: asset.description,
+        price: asset.price,
+        imgUrl: asset.imgUrl,
+      });
     } catch (error) {
       showAlert({
         message: error.message,
         severity: "error",
       });
+    } finally {
+      hideLoader();
     }
   }
 

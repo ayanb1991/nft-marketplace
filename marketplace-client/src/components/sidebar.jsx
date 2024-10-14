@@ -10,7 +10,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { text: 'Store', icon: <HomeIcon />, url: '/store' },
+    { text: 'Store', icon: <HomeIcon />, url: '/asset/listing' },
     { text: 'Create Asset', icon: <ExploreIcon />, url: '/asset/create' },
     { text: 'My Assets', icon: <PersonIcon />, url: '/asset/owned' },
   ];

@@ -1,23 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/auth.context";
-import { CircularProgress } from "@mui/material";
+import FullPageLoader from "./loader";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </div>
-    );
+    return <FullPageLoader />;
   }
 
   if (user) {
