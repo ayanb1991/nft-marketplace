@@ -80,9 +80,9 @@ const Signup = () => {
       if (newUser) {
         await giftSignupCredits();
         showAlert({
-          message: "You have successfully signed up. Please login to continue",
+          message: "You have successfully signed up",
         });
-        navigate("/login");
+        navigate("/asset/listing");
       }
     } catch (error) {
       console.error("Error creating user:", error);

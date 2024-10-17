@@ -1,7 +1,7 @@
-import axiosInstance from "./axios";
+import { axiosInstance_IPFS } from "./axios";
 
 const ipfsAPI = {
-  createItem: (data) => axiosInstance.post(`/ipfs`, data),
+  createItem: (data) => axiosInstance_IPFS.post(`/ipfs`, data),
 };
 
 export default ipfsAPI;

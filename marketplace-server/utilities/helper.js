@@ -1,6 +1,7 @@
 const provider = require("../utilities/provider");
 const abis = require("../utilities/abi");
 const web3 = require("web3");
+const axios = require("axios");
 
 const parseAsset = (asset) => {
   const {tokenId, currentOwner, price, tokenURI} = asset;
@@ -24,8 +25,19 @@ const getDeployer = async () => {
   return deployer;
 }
 
+const getIPFSData = async (ipfsKey) => {
+  try {
+    // call ipfs server to get the data
+    const response = await axios.get(`${process.env.IPFS_SERVER_URL}/ipfs/${ipfsKey}`);
+    return response?.data?.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports =  {
   parseAsset,
   getContractInstance,
   getDeployer,
+  getIPFSData
 };

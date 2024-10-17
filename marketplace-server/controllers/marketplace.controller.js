@@ -2,31 +2,39 @@ const logger = require("../utilities/logger");
 const helpers = require("../utilities/helper");
 const { getContractInstance } = require("../utilities/helper");
 const web3 = require("web3");
-const ipfs = require("../utilities/ipfs-client");
 const contract = getContractInstance();
 
-const getAssetById = async (req, res) => {
+const _getAssetById = async (assetId) => {
   try {
-    const { assetId } = req.params;
-
-    logger.info(`getting asset ${assetId}`);
     const chainData = helpers.parseAsset(
       await contract.methods.getAsset(assetId).call()
     );
 
     const ipfsKey = chainData.tokenURI;
-    let ipfsData = (await ipfs.get(ipfsKey)) || {};
+
+    let ipfsData = (await helpers.getIPFSData(ipfsKey)) || {};
     if (typeof ipfsData === "string") {
       ipfsData = JSON.parse(ipfsData);
     }
-    console.log("ipfsData:", ipfsData, typeof ipfsData);
 
     // combine data obtained from chain and ipfs
     const _asset = {
       ...chainData,
       ...ipfsData,
     };
-    if (_asset.tokenId) {
+    return _asset;
+  } catch (error) {
+    logger.error(error.message);
+    return null;
+  }
+}
+
+const getAssetById = async (req, res) => {
+  try {
+    const { assetId } = req.params;
+
+    const _asset = await _getAssetById(assetId);
+    if (_asset) {
       res.status(200).json({ asset: _asset });
     } else {
       res.status(404).send("Asset not found");
@@ -45,21 +53,10 @@ const listAllAssets = () => {
       let allAssets = [];
 
       for (let assetId = 10001; assetId <= lastAssetIdBN; assetId++) {
-        const chainData = helpers.parseAsset(
-          await contract.methods.getAsset(assetId).call()
-        );
-        const ipfsKey = chainData.tokenURI;
-        let ipfsData = (await ipfs.get(ipfsKey)) || {};
-        if (typeof ipfsData === "string") {
-          ipfsData = JSON.parse(ipfsData);
+        const _asset = await _getAssetById(assetId);
+        if (_asset) {
+          allAssets.push(_asset);
         }
-        console.log("ipfsData:", ipfsData, typeof ipfsData);
-        // combine data obtained from chain and ipfs
-        const _asset = {
-          ...chainData,
-          ...ipfsData,
-        };
-        allAssets.push(_asset);
       }
 
       resolve(allAssets);
@@ -80,7 +77,7 @@ const getOwnedItems = async (req, res, next) => {
       allAssets.filter(
         (el) =>
           web3.utils.toChecksumAddress(el.currentOwner) ===
-          web3.utils.toChecksumAddress(address)
+          web3.utils.toChecksumAddress(address) && el.price === 0
       ) || [];
 
     res.status(200).send(ownedItems);
@@ -93,7 +90,8 @@ const getOwnedItems = async (req, res, next) => {
 const getListedAssets = async (req, res, next) => {
   try {
     const allAssets = await listAllAssets();
-    const assetForSale = allAssets.filter((el) => el.price !== 0);
+    const assetForSale = allAssets.filter((el) => el.price > 0);
+    logger.silly(assetForSale);
 
     res.status(200).send(assetForSale);
   } catch (error) {

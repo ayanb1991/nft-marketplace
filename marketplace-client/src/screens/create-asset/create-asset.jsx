@@ -112,8 +112,9 @@ const CreateAsset = () => {
         nftMarketPlaceAbi,
         metamaskSigner
       );
-      // save data to ipfs and obtain url
-      const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
+      // save data to ipfs and obtain url, skip price, that will be stored in contract
+      const {price, ...ipfsData} = newAsset;
+      const ipfsURI = (await IPFSApi.createItem(ipfsData)).data?.path;
       console.log("ipfsURI", ipfsURI);
 
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");
