@@ -16,11 +16,13 @@ const _getAssetById = async (assetId) => {
     if (typeof ipfsData === "string") {
       ipfsData = JSON.parse(ipfsData);
     }
-
+    
     // combine data obtained from chain and ipfs
+    const {price, ...otherChainData} = chainData;
     const _asset = {
-      ...chainData,
+      ...otherChainData,
       ...ipfsData,
+      price // prefer price from chain
     };
     return _asset;
   } catch (error) {

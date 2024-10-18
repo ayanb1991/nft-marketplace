@@ -2,12 +2,14 @@ import React, { useEffect, useState, useContext, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
-import { connectToContract } from "../../utilities";
+import { compareAddress, connectToContract } from "../../utilities";
 import { MarketplaceApi } from "../../api";
 import { Typography, Box, Button } from "@mui/material";
 import NoContent from "../../components/no-content";
 import AssetItem from "../../components/store-asset-item";
 import AlertContext from "../../context/alert.context";
+import { useAuth } from "../../context/auth.context";
+import If from "../../components/if";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
@@ -15,6 +17,8 @@ const AssetListing = () => {
   const { provider: metamaskProvider } = useMetaMask();
   const [listedAssets, set_listedAssets] = useState([]);
   const { showAlert } = useContext(AlertContext);
+  const { user } = useAuth();
+
   const navigate = useNavigate();
 
   const getAllListedAssets = async () => {
@@ -32,7 +36,8 @@ const AssetListing = () => {
 
   const removeListing = async (assetId) => {
     try {
-      const metamaskSigner = await metamaskProvider.getSigner();
+      const preferredAddress = user?.eoaAddress;
+      const metamaskSigner = await metamaskProvider.getSigner(preferredAddress);
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
@@ -48,7 +53,8 @@ const AssetListing = () => {
 
   const buyAsset = async (assetId) => {
     try {
-      const metamaskSigner = await metamaskProvider.getSigner();
+      const preferredAddress = user?.eoaAddress;
+      const metamaskSigner = await metamaskProvider.getSigner(preferredAddress);
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
@@ -76,6 +82,7 @@ const AssetListing = () => {
 
   useEffect(() => {
     getAllListedAssets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -85,36 +92,53 @@ const AssetListing = () => {
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {listedAssets.length > 0 ? (
-          listedAssets.map((asset) => (
-            <AssetItem
-              key={asset.tokenId}
-              asset={asset}
-              actionRenders={() => {
-                return (
-                  <Fragment>
-                    <Button
-                      size="small"
-                      onClick={() => buyAsset(asset?.tokenId)}
-                    >
-                      Buy
-                    </Button>
-                    {/* <Button
-                      size="small"
-                      onClick={() => removeListing(asset?.tokenId)}
-                    >
-                      Remove
-                    </Button> */}
-                    <Button
-                      size="small"
-                      onClick={() => navigate(`/asset/history/${asset.tokenId}`)}
-                    >
-                      History
-                    </Button>
-                  </Fragment>
-                );
-              }}
-            />
-          ))
+          listedAssets.map((asset) => {
+            return (
+              <AssetItem
+                key={asset.tokenId}
+                asset={asset}
+                actionRenders={() => {
+                  return (
+                    <Fragment>
+                      <If
+                        condition={
+                          !compareAddress(user?.eoaAddress, asset?.currentOwner)
+                        }
+                      >
+                        <Button
+                          size="small"
+                          onClick={() => buyAsset(asset?.tokenId)}
+                        >
+                          Buy
+                        </Button>
+                      </If>
+                      <If
+                        condition={compareAddress(
+                          user?.eoaAddress,
+                          asset?.currentOwner
+                        )}
+                      >
+                        <Button
+                          size="small"
+                          onClick={() => removeListing(asset?.tokenId)}
+                        >
+                          Remove
+                        </Button>
+                      </If>
+                      <Button
+                        size="small"
+                        onClick={() =>
+                          navigate(`/asset/history/${asset.tokenId}`)
+                        }
+                      >
+                        History
+                      </Button>
+                    </Fragment>
+                  );
+                }}
+              />
+            );
+          })
         ) : (
           <NoContent message="No assets found" />
         )}

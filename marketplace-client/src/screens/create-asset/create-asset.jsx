@@ -16,6 +16,7 @@ import { PhotoCamera } from "@mui/icons-material";
 import AlertContext from "../../context/alert.context";
 import marketplaceApi from "../../api/marketplace.api";
 import LoaderContext from "../../context/loader.context";
+import { useAuth } from "../../context/auth.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
@@ -25,6 +26,7 @@ const CreateAsset = () => {
   const { showLoader, hideLoader } = useContext(LoaderContext);
   const navigate = useNavigate();
   const { assetId } = useParams();
+  const { user } = useAuth();
 
   // check if this is an update action
   const isUpdateAction = !!assetId;
@@ -106,7 +108,8 @@ const CreateAsset = () => {
 
   const createAsset = async () => {
     try {
-      const metamaskSigner = await metamaskProvider.getSigner();
+      const preferredAddress = user?.eoaAddress;
+      const metamaskSigner = await metamaskProvider.getSigner(preferredAddress);
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
@@ -145,13 +148,14 @@ const CreateAsset = () => {
     try {
       if (!validateForm()) return;
 
-      await connectWallet();
-      const metamaskSigner = await metamaskProvider.getSigner();
+      const preferredAddress = user?.eoaAddress;
+      const metamaskSigner = await metamaskProvider.getSigner(preferredAddress);
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
         metamaskSigner
       );
+
       // save data to ipfs and obtain url
       const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
       console.log("ipfsURI", ipfsURI);

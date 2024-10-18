@@ -6,14 +6,16 @@ import NoContent from "../../components/no-content";
 import { useNavigate } from "react-router-dom";
 import AlertContext from "../../context/alert.context";
 import MyAssetItem from "../../components/my-asset-item";
+import { useAuth } from "../../context/auth.context";
 
 const MyAssets = () => {
-  const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
+  const { provider: metamaskProvider, connectWallet } = useMetaMask();
   const { showAlert } = useContext(AlertContext);
   const [myassets, set_myassets] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const getOwnedAssets = useCallback(async () => {
+  const getOwnedAssets = useCallback(async (account) => {
     try {
       if (!account) throw new Error("EOA account not found!");
       const res = await MarketplaceApi.getOwnedAssets(account);
@@ -25,7 +27,7 @@ const MyAssets = () => {
         severity: "error",
       });
     }
-  }, [account, showAlert]);
+  }, [showAlert]);
 
   useEffect(() => {
     if (metamaskProvider) {
@@ -34,15 +36,15 @@ const MyAssets = () => {
   }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
-    if (account) {
-      getOwnedAssets(account);
+    if (user.eoaAddress) {
+      getOwnedAssets(user.eoaAddress);
     }
-  }, [account, getOwnedAssets]);
+  }, [user, getOwnedAssets]);
 
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 2 }}>
-        My Assets
+        Puchased Assets
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
         {myassets.length > 0 ? (

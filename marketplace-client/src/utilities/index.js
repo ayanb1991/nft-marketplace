@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
  * Connects to a contract on a local Hardhat node or other network
  * @param {string} contractAddress - The address of the contract
  * @param {object} contractABI - The ABI of the contract
- * @param {string} [providerUrl='http://127.0.0.1:8545'] - The provider URL (default is local Hardhat node)
+ * @param {ethers.Signer} signer - The signer to interact with the contract
  * @returns {ethers.Contract} - An instance of the contract
  */
 export const connectToContract = async (contractAddress, contractABI, signer) => {
@@ -36,3 +36,11 @@ export const getLocalSigner = async (providerUrl = 'http://127.0.0.1:8545') => {
     }
   }
 };
+
+export const compareAddress = (address1, address2) => {
+  try {
+    return ethers.getAddress(address1) === ethers.getAddress(address2);
+  } catch (error) {
+    return false;
+  }
+}

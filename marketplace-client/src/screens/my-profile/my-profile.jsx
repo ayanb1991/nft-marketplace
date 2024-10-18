@@ -1,20 +1,26 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Button, Typography } from "@mui/material";
 import { useMetaMask } from "../../hooks/useMetamask";
 import { nftMarketPlaceAbi } from "../../utilities/abi";
-import { connectToContract } from "../../utilities";
+import { connectToContract, getLocalSigner } from "../../utilities";
 import { ethers } from "ethers";
+import { useAuth } from "../../context/auth.context";
+import AlertContext from "../../context/alert.context";
 
 const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
 
 const MyProfile = () => {
-  const { account, provider: metamaskProvider, connectWallet } = useMetaMask();
+  const { provider: metamaskProvider, connectWallet } = useMetaMask();
   const [userBalance, set_userBalance] = useState(0);
+  const { user } = useAuth();
+  const { showAlert } = useContext(AlertContext);
 
   const rechargeMtoken = async (e) => {
     e.preventDefault();
     try {
-      const metamaskSigner = await metamaskProvider.getSigner();
+      // we are preferring the logged in user's balance to be fetched, for other connected accounts, it should throw an error
+      const preferredAddress = user.eoaAddress;
+      const metamaskSigner = await metamaskProvider.getSigner(preferredAddress);
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
@@ -26,16 +32,20 @@ const MyProfile = () => {
       });
       await tx.wait();
       console.log("txHash", tx);
-      await getBalance();
+      
+      await getBalance(preferredAddress);
     } catch (e) {
       console.log("error", e);
+      showAlert({
+        message: e.message,
+        severity: "error",
+      });
     }
   };
 
-  const getBalance = useCallback(async () => {
-    if (!metamaskProvider) return;
+  const getBalance = useCallback(async (account) => {
     try {
-      const txSigner = await metamaskProvider.getSigner();
+      const txSigner = await getLocalSigner();
       const contract = await connectToContract(
         contractAddress,
         nftMarketPlaceAbi,
@@ -45,8 +55,12 @@ const MyProfile = () => {
       set_userBalance(parseInt(balance));
     } catch (e) {
       console.log("error", e);
+      showAlert({
+        message: e.message,
+        severity: "error",
+      });
     }
-  }, [metamaskProvider, account]);
+  }, []);
 
   useEffect(() => {
     if (metamaskProvider) {
@@ -55,10 +69,10 @@ const MyProfile = () => {
   }, [metamaskProvider, connectWallet]);
 
   useEffect(() => {
-    if (account) {
-      getBalance();
+    if (user.eoaAddress) {
+      getBalance(user.eoaAddress);
     }
-  }, [account, getBalance]);
+  }, [user, getBalance]);
 
   return (
     <div>
@@ -69,7 +83,7 @@ const MyProfile = () => {
         MToken Balance: {userBalance}
       </Typography>
       <Typography variant="subtitle1" component="h1" gutterBottom>
-        Connected Account: {account}
+        Connected Account: {user.eoaAddress}
       </Typography>
       <Button
         variant="contained"

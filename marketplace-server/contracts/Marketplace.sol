@@ -110,6 +110,9 @@ contract Marketplace is ERC1155, Ownable, Pausable {
         // Mint the asset token to the creator
         _mint(msg.sender, newAssetId, 1, "");
 
+        // emit and initial transfer event, here seller will be the contract owner
+        emit AssetTransfer(newAssetId, address(0), msg.sender, priceInMTokens);
+
         return newAssetId;
     }
 
