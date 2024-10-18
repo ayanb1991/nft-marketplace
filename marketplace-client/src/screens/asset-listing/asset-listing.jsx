@@ -46,6 +46,9 @@ const AssetListing = () => {
 
       const res = await contract.removeAsset(assetId);
       console.log("res:", res);
+
+      // refresh the listed assets
+      getAllListedAssets();
     } catch (e) {
       console.log("error", e);
     }

@@ -33,7 +33,7 @@ const AssetHistory = () => {
 
   const getNode = (transaction) => {
     return (
-      <Card sx={{ maxWidth: 600, mb: 2 }}>
+      <Card sx={{ maxWidth: 600, mb: 0 }}>
         <CardContent>
           <Typography
             gutterBottom
@@ -75,7 +75,7 @@ const AssetHistory = () => {
         {ownershipHistory.map((transaction, index) => (
           <Box
             key={index}
-            sx={{ display: "flex", flexDirection: "column", mb: 2 }}
+            sx={{ display: "flex", flexDirection: "column", mb: 0 }}
           >
             {getNode(transaction)}
             {index < ownershipHistory.length - 1 && (

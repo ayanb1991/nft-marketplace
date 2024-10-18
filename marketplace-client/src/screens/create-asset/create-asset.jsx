@@ -157,7 +157,8 @@ const CreateAsset = () => {
       );
 
       // save data to ipfs and obtain url
-      const ipfsURI = (await IPFSApi.createItem(newAsset)).data?.path;
+      const {price, ...ipfsData} = newAsset;
+      const ipfsURI = (await IPFSApi.createItem(ipfsData)).data?.path;
       console.log("ipfsURI", ipfsURI);
 
       if (!ipfsURI) throw new Error("failed to obtain ipfs url");

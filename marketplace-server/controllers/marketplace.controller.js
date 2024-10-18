@@ -10,17 +10,21 @@ const _getAssetById = async (assetId) => {
       await contract.methods.getAsset(assetId).call()
     );
 
+    logger.info(`chainData for assetId ${assetId}: ${JSON.stringify(chainData)}`);
+
     const ipfsKey = chainData.tokenURI;
 
     let ipfsData = (await helpers.getIPFSData(ipfsKey)) || {};
     if (typeof ipfsData === "string") {
       ipfsData = JSON.parse(ipfsData);
     }
+
+    logger.info(`ipfsData for assetId ${assetId}: ${JSON.stringify(ipfsData)}`);
     
     // combine data obtained from chain and ipfs
-    const {price, ...otherChainData} = chainData;
+    const {price, ...chainDataRest} = chainData;
     const _asset = {
-      ...otherChainData,
+      ...chainDataRest,
       ...ipfsData,
       price // prefer price from chain
     };
